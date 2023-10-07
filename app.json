@@ -1,0 +1,19 @@
+{
+  "name": "NotionFly",
+  "displayName": "NotionFly",
+  "expo": {
+    "name": "NotionFly",
+    "slug": "notionfly",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    }
+  }
+}

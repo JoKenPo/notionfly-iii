@@ -6,6 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const NAMESPACE = 'notion-page';
 AsyncStorage.setItem(NAMESPACE, '');
 
+interface ITransactions {
+  id: string, 
+  name: string, 
+  amount: string, 
+  date: Date, 
+  category: Array<string>
+}
+
 export class Notion {
   private notion: Client;
   private transactionsDatabaseId: string;
@@ -34,7 +42,7 @@ export class Notion {
 
   pages: Record<string, { id: string }> = {};
   accounts: Record<string, { id: string }> = {};
-  transactions: Array<{ id: string, name: string, amount: string, date: Date, category:Array<string> }> = [];
+  transactions: ITransactions[] = [];
   databaseId: string;
 
   hasPage(name: string) {
@@ -64,7 +72,7 @@ export class Notion {
           });
 
           // this.addPages(database.results as NotionPage[]);
-          this.addPages(database.results);
+          await this.addPages(database.results);
           hasNext = database.has_more;
           // @ts-ignore
           cursor = database.next_cursor;
@@ -179,7 +187,7 @@ export class Notion {
             start_cursor: cursor,
         });
 
-        this.addAccounts(database.results);
+        await this.addAccounts(database.results);
         hasNext = database.has_more;
         // @ts-ignore
         cursor = database.next_cursor;
@@ -187,9 +195,10 @@ export class Notion {
 
     console.log(`Notion: Get all accounts success, count is ${Object.keys(this.accounts).length}`);
 
-    console.log('this.accounts: ',this.accounts);
+    // console.log('this.accounts: ',this.accounts);
 
     // this.save();
+    return this.accounts
   }
 
   addAccounts(pages) {
@@ -226,22 +235,23 @@ export class Notion {
             start_cursor: cursor,
         });
 
-        this.addTransactions(database.results);
+        await this.addTransactions(database.results);
         hasNext = database.has_more;
         // @ts-ignore
         cursor = database.next_cursor;
     }
 
-    console.log(`Notion: Get all transactions success, count is ${Object.keys(this.transactions).length}`);
+    console.log(`Notion: Get all transactions success, count is ${this.transactions.length}`);
 
-    console.log('this.transactions: ',this.transactions);
+    // console.log('this.transactions: ',this.transactions);
 
     // this.save();
+    return this.transactions
   }
 
-  addTransactions(pages) {
-    let newTransaction : Array<{ id: string, name: string, amount: string, date: Date, category:Array<string> }> = []
-    pages.forEach((page) => {
+  async addTransactions(pages) {
+    let newTransaction : ITransactions[] = []
+    await pages.forEach((page) => {
       newTransaction.push({
           id: page.id,
           name: page.properties.Name.title[0].plain_text,
@@ -251,7 +261,7 @@ export class Notion {
         });
     });
 
-    this.transactions.push(newTransaction)
+    await this.transactions.push(...newTransaction)
     // this.save();
   }
 
@@ -268,46 +278,35 @@ export class Notion {
   });
 
     let transactionsDatabase = {};
-    let accountsDatabase = {};
+    let accountsDatabase = [];
 
     // console.log('DATA: ',JSON.stringify(databases));
-    await databases.results.map(async (db) => {
+    for (const db of databases.results) {
       console.log(db.id.split('-').join(''));
       const page = await this.notion.blocks.children.list({
         block_id: db.id.split('-').join(''),
       });
-      // console.log('page: ',JSON.stringify(page));
-
-      await page.results.map(async (item) => {
-        // console.log('item: ',item);
-        if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Transactions' ) {
+  
+      for (const item of page.results) {
+        if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Transactions') {
           this.transactionsDatabaseId = item.id;
-          console.log('this.transactionsDatabaseId: ',this.transactionsDatabaseId);
-          this.syncTransactions();
-
-          // transactionsDatabase = await notion.databases.query({
-          //   database_id: item.id.split('-').join(''),
-          // });
-          // console.log(transactionsDatabase);
+          console.log('this.transactionsDatabaseId: ', this.transactionsDatabaseId);
+          transactionsDatabase = await this.syncTransactions();
         }
-
-        if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Accounts' ) {
+  
+        if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Accounts') {
           this.accountsDatabaseId = item.id;
-          console.log('this.accountsDatabaseId: ',this.accountsDatabaseId);
-          this.syncAccounts();
-
-          // accountsDatabase = await notion.databases.query({
-          //   database_id: item.id.split('-').join(''),
-          // });
-          // // console.log('accountsDatabase: ',accountsDatabase);
-          // accountsDatabase.results.map(async (account)=> {
-          //   console.log('Contas: ',account.properties.Name.title[0].plain_text);
-          // });
+          console.log('this.accountsDatabaseId: ', this.accountsDatabaseId);
+          accountsDatabase = await this.syncAccounts();
         }
-      });
-
-
-    });
+      }
+    }
+  
+  
+    return {
+      accounts: accountsDatabase,
+      transactions: transactionsDatabase,
+    };
   }
 
 }

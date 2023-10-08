@@ -69,7 +69,7 @@ export function Dashboards() {
 
   function getPiechart() {
     let categoriesChart = []
-    notionCore.transactions[0].map((trans) => {
+    notionCore.transactions.map((trans) => {
       // return notionCore.transactions[0].map((trans) => {
       trans.category.map((category) => {
         categoriesChart.push({

@@ -34,7 +34,7 @@ export class Notion {
 
   pages: Record<string, { id: string }> = {};
   accounts: Record<string, { id: string }> = {};
-  transactions: Array<{ id: string, name: string, amount: string, date: Date }> = [];
+  transactions: Array<{ id: string, name: string, amount: string, date: Date, category:Array<string> }> = [];
   databaseId: string;
 
   hasPage(name: string) {
@@ -240,17 +240,16 @@ export class Notion {
   }
 
   addTransactions(pages) {
-    let newTransaction : Array<{ id: string, name: string, amount: string, date: Date }> = []
+    let newTransaction : Array<{ id: string, name: string, amount: string, date: Date, category:Array<string> }> = []
     pages.forEach((page) => {
       newTransaction.push({
           id: page.id,
           name: page.properties.Name.title[0].plain_text,
           amount: page.properties.Amount.number,
           date: page.properties.Date.date.start,
+          category: page.properties.Category.multi_select
         });
-        console.log('newTransaction: ',newTransaction);
     });
-    console.log('newTransaction: ',newTransaction);
 
     this.transactions.push(newTransaction)
     // this.save();

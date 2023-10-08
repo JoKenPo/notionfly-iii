@@ -40,7 +40,7 @@ const NotionProvider = ({ children }: IProps) => {
   const [accounts, setAccounts] = React.useState<IAccount[]>([]);
   const [transactions, setTransactions] = React.useState();
   const [notion, setNotion] = React.useState<Notion>();
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
 
   useEffect(() => {
     loadSavedInfo();
@@ -48,7 +48,6 @@ const NotionProvider = ({ children }: IProps) => {
 
   const loadSavedInfo = async () => {
     try {
-      setLoading(true)
 
       const savedSecretKey = await AsyncStorage.getItem('secretKey');
       const savedDatabaseId = await AsyncStorage.getItem('databaseId');
@@ -58,7 +57,7 @@ const NotionProvider = ({ children }: IProps) => {
 
         // setTransactionsDatabase(databasesIds.transactionsDatabaseId);
         // setAccountsDatabase(databasesIds.accountsDatabaseId);
-        setNotion(await new Notion(savedSecretKey, savedDatabaseId));
+        await setNotion(await new Notion(savedSecretKey, savedDatabaseId));
         // notion.fullSyncIfNeeded();
       }
 
@@ -66,19 +65,30 @@ const NotionProvider = ({ children }: IProps) => {
       console.log('error: ', error);
       // navigation.navigate('FirstAccess');
     }
-    setLoading(false)
   };
 
-  useEffect(() => {
-    if (notion)
-      notion.getMainDatabase()
+  const getNotionDatabases = async () => {
+    if (notion) {
 
+      await notion.getMainDatabase()
+        .then(() => {
+          setAccounts(notion.accounts)
+          setTransactions(notion.transactions)
+        })
+        .catch((error) => {
+          console.log("Error when tryng to get main databases from notion: ", error)
+        })
+    }
+  }
+
+  useEffect(() => {
+    getNotionDatabases()
   }, [notion])
 
   useEffect(() => {
-    console.log('newNotion: ', notion);
     setTransactions(notion?.transactions)
-  }, [notion?.transactions])
+    if (notion?.transactions.length) setLoading(false)
+  }, [notion?.transactions.length])
   // const navigation = useNavigation(); // Inicialize a navegação
 
   return (

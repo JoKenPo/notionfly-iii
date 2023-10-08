@@ -1,6 +1,6 @@
 <p align="center" >
   <a href="" >
-    <img src="https://raw.githubusercontent.com/JoKenPo/notionfly-iii/master/.github/assets/img/logo.png" alt="Notion III" width="100" style="background-color:white;">
+    <img src="https://raw.githubusercontent.com/JoKenPo/notionfly-iii/master/.github/assets/img/logo-small.png" alt="Notion III" width="100" style="background-color:white;">
   </a>
 </p>
 

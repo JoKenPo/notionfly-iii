@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-chart-kit';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 import { AddButton } from '../../components/AddButton';
 import { NotionContext } from '../../contexts/NotionContext';
+import { groupAndSumBy } from './../../utils/array.utils';
 
 export function Dashboards() {
   const notionCore = useContext(NotionContext);
@@ -67,15 +68,30 @@ export function Dashboards() {
   };
 
   function getPiechart() {
-    return notionCore.transactions[0].map((trans) => {
-      return {
-        name: trans.name,
-        population: trans.amount,
-        color: getRandomColor(),
-        legendFontColor: 'black',
-        legendFontSize: 15,
-      }
+    let categoriesChart = []
+    notionCore.transactions.map((trans) => {
+      // return notionCore.transactions[0].map((trans) => {
+      trans.category.map((category) => {
+        categoriesChart.push({
+          name: category.name,
+          population: trans.amount,
+          color: category.color,
+          legendFontColor: 'black',
+          legendFontSize: 12,
+        })
+      })
     })
+
+    // const groupedData = groupAndSumBy(categoriesChart, "name", "population")
+
+    // const totalPopulation = groupedData.reduce((total, item) => total + item.population, 0);
+
+    // groupedData.forEach((item) => {
+    //   item.population = ((item.population / totalPopulation) * 100).toFixed(0);
+    // });
+
+    // return groupedData
+    return groupAndSumBy(categoriesChart, "name", "population")
   }
 
   useEffect(() => {
@@ -88,11 +104,9 @@ export function Dashboards() {
   return (
     <>
       <ScrollView
-        // style={{ flex: 1 }}
         className="flex-1"
       >
         <View className="p-4">
-          {/* <Header title={'Painel'} /> */}
 
           <View className="flex items-center justify-center">
 
@@ -109,7 +123,12 @@ export function Dashboards() {
               chartConfig={{
                 backgroundGradientFrom: 'white',
                 backgroundGradientTo: 'white',
+                decimalPlaces: 0,
                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+
               }}
               accessor="population"
               backgroundColor="transparent"

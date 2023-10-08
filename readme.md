@@ -1,7 +1,7 @@
-<p align="center">
-  <!-- <a href=""> -->
-    <img src="https://raw.githubusercontent.com/JoKenPo/notionfly-iii/develop/.github/assets/img/logo.png" alt="Notion III" width="120" height="178">
-  <!-- </a> -->
+<p align="center" >
+  <a href="" >
+    <img src="https://raw.githubusercontent.com/JoKenPo/notionfly-iii/master/.github/assets/img/logo.png" alt="Notion III" width="100" style="background-color:white;">
+  </a>
 </p>
 
   <h1 align="center">Notionfly III</h1>

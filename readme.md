@@ -14,7 +14,7 @@ This is the [template](https://jokenp0.notion.site/Notionfly-27e7343b959746ee90a
 To use it, you must:
 
 - Duplicate this template;
-- Get the [id of this duplicated database](https://developers.notion.com/reference/retrieve-a-database#:~:text=To%20find%20a%20database%20ID,applicable)%20and%20the%20question%20mark.) within your Notion workspace;
+- Get the [id of this duplicated database](https://developers.notion.com/reference/retrieve-a-database) within your Notion workspace;
 - And you will also need to [create a <b>secret_key</b> in Notion](https://www.notion.so/help/create-integrations-with-the-notion-api);
 
 With these two IDs it will be possible to access your database and do magic with this application.

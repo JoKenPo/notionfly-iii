@@ -14,6 +14,12 @@ interface ITransactions {
   category: Array<string>
 }
 
+interface IAccounts {
+  id: string,
+  type: string,
+  balance: string,
+}
+
 export class Notion {
   private notion: Client;
   private transactionsDatabaseId: string;
@@ -41,7 +47,7 @@ export class Notion {
   }
 
   pages: Record<string, { id: string }> = {};
-  accounts: Record<string, { id: string }> = {};
+  accounts: Record<string, IAccounts> = {};
   transactions: ITransactions[] = [];
   databaseId: string;
 
@@ -195,7 +201,7 @@ export class Notion {
 
     console.log(`Notion: Get all accounts success, count is ${Object.keys(this.accounts).length}`);
 
-    // console.log('this.accounts: ',this.accounts);
+    console.log('this.accounts: ',this.accounts);
 
     // this.save();
     return this.accounts
@@ -205,6 +211,8 @@ export class Notion {
     pages.forEach((page) => {
         this.accounts[page.properties.Name.title[0].plain_text] = {
           id: page.id,
+          type: page.properties["Source Type"].select.name,
+          balance: page.properties["# Balance TOTAL"].formula.number
         };
     });
 

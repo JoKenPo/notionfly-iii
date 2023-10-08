@@ -1,5 +1,5 @@
 {
-  "name": "NotionFly",
+  "name": "NotionFly III",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -31,7 +31,8 @@
     "react-native-reanimated": "~2.12.0",
     "react-native-safe-area-context": "4.4.1",
     "react-native-screens": "~3.18.0",
-    "react-native-svg": "13.4.0"
+    "react-native-svg": "13.4.0",
+    "victory-native": "^36.6.11"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

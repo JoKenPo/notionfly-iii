@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { View, ScrollView, Text } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
-import { LineChart, BarChart } from 'react-native-chart-kit';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { VictoryChart, VictoryBar, VictoryGroup, VictoryAxis, VictoryPie } from 'victory-native';
 import { AddButton } from '../../components/AddButton';
 import { NotionContext } from '../../contexts/NotionContext';
 import { groupAndSumBy } from './../../utils/array.utils';
@@ -10,9 +10,10 @@ export function Dashboards() {
   const notionCore = useContext(NotionContext);
 
   const [chartData, setChartData] = React.useState([]);
+  const [pieChartData, setPieChartData] = React.useState([]);
 
 
-  let pieChartData = [
+  let exChartData = [
     {
       name: 'Red',
       population: 45,
@@ -58,14 +59,16 @@ export function Dashboards() {
     ],
   };
 
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+
+  const lastDaysData = [
+    { day: 'Seg', received: 100, spent: 80 },
+    { day: 'Ter', received: 200, spent: 120 },
+    { day: 'Qua', received: 150, spent: 90 },
+    { day: 'Qui', received: 250, spent: 150 },
+    { day: 'Sex', received: 180, spent: 100 },
+    { day: 'Sáb', received: 220, spent: 140 },
+    { day: 'Dom', received: 300, spent: 200 },
+  ];
 
   function getPiechart() {
     let categoriesChart = []
@@ -73,31 +76,34 @@ export function Dashboards() {
       // return notionCore.transactions[0].map((trans) => {
       trans.category.map((category) => {
         categoriesChart.push({
-          name: category.name,
-          population: trans.amount,
-          color: category.color,
-          legendFontColor: 'black',
-          legendFontSize: 12,
+          x: category.name,
+          y: trans.amount,
+          color: category.color
         })
       })
     })
 
-    // const groupedData = groupAndSumBy(categoriesChart, "name", "population")
+    return groupAndSumBy(categoriesChart, "x", "y").sort(function (a, b) { return b.y - a.y })
+  }
 
-    // const totalPopulation = groupedData.reduce((total, item) => total + item.population, 0);
-
-    // groupedData.forEach((item) => {
-    //   item.population = ((item.population / totalPopulation) * 100).toFixed(0);
-    // });
-
-    // return groupedData
-    return groupAndSumBy(categoriesChart, "name", "population")
+  function getLastMonthsChart() {
+    let lastMonthsChart = []
+    notionCore.accounts.map((trans) => {
+      // return notionCore.transactions[0].map((trans) => {
+      // trans.category.map((category) => {
+      //   categoriesChart.push({
+      //     name: category.name,
+      //     population: trans.amount,
+      //     color: category.color,
+      //     legendFontColor: 'black',
+      //     legendFontSize: 12,
+      //   })
+      // })
+    })
   }
 
   useEffect(() => {
-    // console.log('notionCore: ', notionCore);
-    // notionCore.notion.getMainDatabase();
-    setChartData(getPiechart)
+    setPieChartData(getPiechart)
     // eslint-disable-next-line
   }, [notionCore.transactions])
 
@@ -115,27 +121,47 @@ export function Dashboards() {
                 : (<Text>ja carregou {JSON.stringify(notionCore.transactions)}</Text>)
             } */}
 
+            {/* Gráfico Últimos Dias */}
+            <View className="ml-8 ">
+              <VictoryChart
+                domainPadding={{ x: 20 }}
+                width={350}
+                height={300}
+              >
+                <VictoryGroup offset={10}>
+                  <VictoryBar data={lastDaysData} x="day" y="received" style={{ data: { fill: '#008000' } }} />
+                  <VictoryBar data={lastDaysData} x="day" y="spent" style={{ data: { fill: '#FF0000' } }} />
+                </VictoryGroup>
+                <VictoryAxis tickValues={lastDaysData.map((item) => item.day)} />
+                <VictoryAxis dependentAxis tickFormat={(x) => `R$${x}`} />
+              </VictoryChart>
+            </View>
+            <Text>Recebido vs. Gasto nos últimos 7 dias</Text>
+
             {/* Gráfico de Pizza */}
-            <PieChart
-              data={chartData || pieChartData}
-              width={300}
-              height={200}
-              chartConfig={{
-                backgroundGradientFrom: 'white',
-                backgroundGradientTo: 'white',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
+            <Text>Distribuição de Despesas</Text>
+            <View className="flex-row align-middle text-center items-center">
+              <VictoryPie
+                width={250}
+                height={250}
+                padAngle={1}
+                // innerRadius={50}
+                data={pieChartData}
+                colorScale={pieChartData.map((item) => item.color)}
+                labels={({ datum, index }) => index < 3 ? `${datum.y}` : ''}
+              // labelRadius={75}
+              // style={{ labels: { fill: 'black' } }}
+              />
 
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
-
+              <View className="flex-col -ml-9">
+                {pieChartData.map((item, index) => (
+                  <View key={index} className="flex-row items-center mb-3">
+                    <View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: item.color }} />
+                    <Text numberOfLines={1}>{item.x}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
             {/* Gráfico de Linha */}
             <LineChart
               data={lineChartData}

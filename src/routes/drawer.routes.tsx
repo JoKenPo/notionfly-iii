@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Menu } from 'lucide-react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import { Dashboards } from '../pages/dashboards/dashboards';
-import { Transaction } from '../pages/transaction/transactions';
-import { TabRoutes } from './tab.routes';
-import { NotionProvider } from '../contexts/NotionContext';
+import { Dashboards } from '../pages/dashboards';
+import { Transaction } from '../pages/transaction';
+// import { TabRoutes } from './tab.routes';
+// import { NotionProvider } from '../contexts/NotionContext';
 
 const Drawer = createDrawerNavigator();
 

@@ -22,3 +22,5 @@ With these two IDs it will be possible to access your database and do magic with
 ## Under Construction
 
 The project is in its initial stages, but the idea of the APP is to create graphs of your expenses, similar to how it is done in Firefly III and also have the feature of reading bank notifications of expenses and inserting the data semi-automatically
+
+<b>Feel free to contribute by giving ideas, suggestions, reviews, whatever you feel like helping ❤</b>

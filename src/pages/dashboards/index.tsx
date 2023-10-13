@@ -5,6 +5,8 @@ import { VictoryChart, VictoryBar, VictoryGroup, VictoryAxis, VictoryPie } from 
 import { AddButton } from '../../components/AddButton';
 import { NotionContext } from '../../contexts/NotionContext';
 import { groupAndSumBy } from './../../utils/array.utils';
+import { Circle, Svg } from 'react-native-svg';
+import { Divider } from '@react-native-material/core';
 
 export function Dashboards() {
   const notionCore = useContext(NotionContext);
@@ -61,13 +63,9 @@ export function Dashboards() {
 
 
   const lastDaysData = [
-    { day: 'Seg', received: 100, spent: 80 },
-    { day: 'Ter', received: 200, spent: 120 },
-    { day: 'Qua', received: 150, spent: 90 },
-    { day: 'Qui', received: 250, spent: 150 },
-    { day: 'Sex', received: 180, spent: 100 },
-    { day: 'Sáb', received: 220, spent: 140 },
-    { day: 'Dom', received: 300, spent: 200 },
+    { month: 'Out 2023', received: 100, spent: 80 },
+    { month: 'Set 2023', received: 200, spent: 120 },
+    { month: 'Ago 2023', received: 150, spent: 90 },
   ];
 
   function getPiechart() {
@@ -122,46 +120,74 @@ export function Dashboards() {
             } */}
 
             {/* Gráfico Últimos Dias */}
-            <View className="ml-8 ">
-              <VictoryChart
-                domainPadding={{ x: 20 }}
-                width={350}
-                height={300}
-              >
-                <VictoryGroup offset={10}>
-                  <VictoryBar data={lastDaysData} x="day" y="received" style={{ data: { fill: '#008000' } }} />
-                  <VictoryBar data={lastDaysData} x="day" y="spent" style={{ data: { fill: '#FF0000' } }} />
-                </VictoryGroup>
-                <VictoryAxis tickValues={lastDaysData.map((item) => item.day)} />
-                <VictoryAxis dependentAxis tickFormat={(x) => `R$${x}`} />
-              </VictoryChart>
-            </View>
-            <Text>Recebido vs. Gasto nos últimos 7 dias</Text>
+            <View className="bg-white rounded-xl p-0 m-0 divide-slate-200 divide-y">
+              <View>
+                <Text className="text-center m-2 font-bold text-lg">Recebido vs. Gasto nos últimos meses</Text>
+              </View>
+              <View className="pl-5">
+                <VictoryChart
+                  domainPadding={{ x: 30 }}
+                  width={300}
+                  height={300}
+                >
+                  <VictoryGroup offset={20}>
+                    <VictoryBar data={lastDaysData} x="month" y="received" style={{ data: { fill: '#008000' } }} />
+                    <VictoryBar data={lastDaysData} x="month" y="spent" style={{ data: { fill: '#FF0000' } }} />
+                  </VictoryGroup>
+                  <VictoryAxis tickValues={lastDaysData.map((item) => item.day)} />
+                  <VictoryAxis dependentAxis tickFormat={(x) => `R$${x}`} />
+                </VictoryChart>
+              </View>
 
-            {/* Gráfico de Pizza */}
-            <Text>Distribuição de Despesas</Text>
-            <View className="flex-row align-middle text-center items-center">
-              <VictoryPie
-                width={250}
-                height={250}
-                padAngle={1}
-                // innerRadius={50}
-                data={pieChartData}
-                colorScale={pieChartData.map((item) => item.color)}
-                labels={({ datum, index }) => index < 3 ? `${datum.y}` : ''}
-              // labelRadius={75}
-              // style={{ labels: { fill: 'black' } }}
-              />
-
-              <View className="flex-col -ml-9">
-                {pieChartData.map((item, index) => (
-                  <View key={index} className="flex-row items-center mb-3">
-                    <View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: item.color }} />
-                    <Text numberOfLines={1}>{item.x}</Text>
+              <View className="flex-col">
+                <View className="flex-row p-2">
+                  <View className="flex-2 items-start align-middle" >
+                    <Text />
+                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: "#008000" }} /> Income</Text>
+                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: "#FF0000" }} /> Expenses</Text>
+                    <Text className="font-bold pl-5">Sum</Text>
                   </View>
-                ))}
+                  {lastDaysData.map((item, index) => (
+                    <View key={index} className="flex-1 items-end">
+                      <Text className="font-bold">{item.month}</Text>
+                      <Text>R${item.received}</Text>
+                      <Text>-R${item.spent}</Text>
+                      <Text style={{ fontWeight: 'bold', color: item.received - item.spent >= 0 ? 'green' : 'red' }}>
+                        {item.received - item.spent >= 0 ? '' : '-'}R${item.received - item.spent}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </View>
+
+            {/* Gráfico de Pizza */}
+            <View className="bg-white rounded-xl p-1 m-4 divide-slate-200 divide-y">
+              <Text>Distribuição de Despesas</Text>
+              <View className="flex-row align-middle text-center items-center">
+                <VictoryPie
+                  width={200}
+                  height={200}
+                  padAngle={1}
+                  // innerRadius={50}
+                  data={pieChartData}
+                  colorScale={pieChartData.map((item) => item.color)}
+                  labels={({ datum, index }) => index < 3 ? `${datum.y}` : ''}
+                // labelRadius={75}
+                // style={{ labels: { fill: 'black' } }}
+                />
+
+                <View className="flex-col -ml-10">
+                  {pieChartData.map((item, index) => (
+                    <View key={index} className="flex-row items-center mb-3">
+                      <View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: item.color }} />
+                      <Text numberOfLines={1} className="">{item.x}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </View>
+
             {/* Gráfico de Linha */}
             <LineChart
               data={lineChartData}

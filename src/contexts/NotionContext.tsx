@@ -72,23 +72,23 @@ const NotionProvider = ({ children }: IProps) => {
 
       await notion.getMainDatabase()
         .then(() => {
-          setAccounts(notion.accounts)
-          setTransactions(notion.transactions)
+          setAccounts(notion.accounts);
+          setTransactions(notion.transactions);
         })
         .catch((error) => {
-          console.log("Error when tryng to get main databases from notion: ", error)
-        })
+          console.log('Error when tryng to get main databases from notion: ', error);
+        });
     }
-  }
+  };
 
   useEffect(() => {
-    getNotionDatabases()
-  }, [notion])
+    getNotionDatabases();
+  }, [notion]);
 
   useEffect(() => {
-    setTransactions(notion?.transactions)
-    if (notion?.transactions.length) setLoading(false)
-  }, [notion?.transactions.length])
+    setTransactions(notion?.transactions);
+    if (notion?.transactions.length) { setLoading(false); }
+  }, [notion?.transactions.length]);
   // const navigation = useNavigation(); // Inicialize a navegação
 
   return (

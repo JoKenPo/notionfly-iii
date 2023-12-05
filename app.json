@@ -14,6 +14,11 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0
+    },
+    "extra": {
+      "eas": {
+        "projectId": "730d2340-cc0f-441e-960b-a97415ed4d5f"
+      }
     }
   }
 }

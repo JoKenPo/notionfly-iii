@@ -46,6 +46,7 @@ export function FirstAccess() {
     } else {
       if (!secretKey || !databaseId) {
         setLoading(false);
+        return;
       }
 
       setLoading(true);

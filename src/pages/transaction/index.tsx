@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import RNPickerSelect from 'react-native-picker-select';
+import { NotionContext } from '../../contexts/NotionContext';
 
 export function Transaction() {
   const [name, setName] = useState('');
@@ -11,6 +12,8 @@ export function Transaction() {
   const [originAccount, setOriginAccount] = useState('');
   const [destinationAccount, setDestinationAccount] = useState('');
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+
+  const notionCore = useContext(NotionContext);
 
   const showDatePicker = () => {
     setDatePickerVisible(true);
@@ -25,24 +28,36 @@ export function Transaction() {
     hideDatePicker();
   };
 
+
+  const createTransaction = async () => {
+    try {
+      await notionCore.notion.insertPage(name);
+      console.log('transaction created');
+    } catch (e) {
+      console.log(`error when trying to create the transaction : ${e}`);
+    }
+
+    setName('');
+  };
+
   return (
-    <View className='flex-1 p-4 items-center justify-center'>
+    <View className="flex-1 p-4 items-center justify-center">
       <TextInput
         placeholder="Name"
         value={name}
         onChangeText={(text) => setName(text)}
-        className='w-full p-2 border rounded'
+        className="w-full p-2 border rounded"
       />
       <TextInput
         placeholder="Amount"
         keyboardType="numeric"
         value={amount}
         onChangeText={(text) => setAmount(text)}
-        className='w-full p-2 border rounded mt-2'
+        className="w-full p-2 border rounded mt-2"
       />
       <TouchableOpacity
         onPress={showDatePicker}
-        className='w-full p-2 border rounded mt-2'
+        className="w-full p-2 border rounded mt-2"
       >
         <Text>
           {date ? new Date(date).toLocaleString() : 'Select Date'}
@@ -64,15 +79,15 @@ export function Transaction() {
       ]}
       className='w-full p-2 border rounded mt-2'
     /> */}
-      <View className='w-full mt-2 flex-row items-center justify-between'>
+      <View className="w-full mt-2 flex-row items-center justify-between">
         <TextInput
           placeholder="Origin Account"
           value={originAccount}
           onChangeText={(text) => setOriginAccount(text)}
-          className='w-1/2 p-2 border rounded'
+          className="w-1/2 p-2 border rounded"
         />
         <View
-          className='w-1/12 h-12 bg-transparent items-center justify-center'
+          className="w-1/12 h-12 bg-transparent items-center justify-center"
           style={{
             backgroundColor:
               type === 'Withdraw'
@@ -88,7 +103,7 @@ export function Transaction() {
           placeholder="Destination Account"
           value={destinationAccount}
           onChangeText={(text) => setDestinationAccount(text)}
-          className='w-1/2 p-2 border rounded'
+          className="w-1/2 p-2 border rounded"
         />
       </View>
     </View>

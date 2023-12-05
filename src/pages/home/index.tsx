@@ -22,6 +22,7 @@ export function FirstAccess() {
         const savedDatabaseId = await AsyncStorage.getItem('databaseId');
 
         if (savedSecretKey !== null && savedDatabaseId !== null) {
+          setLoading(true);
           setSecretKey(savedSecretKey);
           setDatabaseId(savedDatabaseId);
 
@@ -44,6 +45,7 @@ export function FirstAccess() {
 
       setLoading(false);
     } else {
+      console.log('secretKey: ', secretKey);
       if (!secretKey || !databaseId) {
         setLoading(false);
         return;

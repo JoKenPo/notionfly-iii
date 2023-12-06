@@ -69,23 +69,23 @@ export function Dashboards() {
   ];
 
   function getPiechart() {
-    let categoriesChart = []
+    let categoriesChart = [];
     notionCore.transactions.map((trans) => {
       // return notionCore.transactions[0].map((trans) => {
       trans.category.map((category) => {
         categoriesChart.push({
           x: category.name,
           y: trans.amount,
-          color: category.color
-        })
-      })
-    })
+          color: category.color,
+        });
+      });
+    });
 
-    return groupAndSumBy(categoriesChart, "x", "y").sort(function (a, b) { return b.y - a.y })
+    return groupAndSumBy(categoriesChart, 'x', 'y').sort(function (a, b) { return b.y - a.y; });
   }
 
   function getLastMonthsChart() {
-    let lastMonthsChart = []
+    let lastMonthsChart = [];
     notionCore.accounts.map((trans) => {
       // return notionCore.transactions[0].map((trans) => {
       // trans.category.map((category) => {
@@ -97,11 +97,11 @@ export function Dashboards() {
       //     legendFontSize: 12,
       //   })
       // })
-    })
+    });
   }
 
   useEffect(() => {
-    setPieChartData(getPiechart)
+    setPieChartData(getPiechart);
     // eslint-disable-next-line
   }, [notionCore.transactions])
 
@@ -110,7 +110,7 @@ export function Dashboards() {
       <ScrollView
         className="flex-1"
       >
-        <View className="p-4">
+        <View className="py-4">
 
           <View className="flex items-center justify-center">
 
@@ -120,7 +120,7 @@ export function Dashboards() {
             } */}
 
             {/* Gráfico Últimos Dias */}
-            <View className="bg-white rounded-xl p-0 m-0 divide-slate-200 divide-y">
+            <View className="bg-white rounded-xl p-0 my-2 divide-slate-200 divide-y">
               <View>
                 <Text className="text-center m-2 font-bold text-lg">Recebido vs. Gasto nos últimos meses</Text>
               </View>
@@ -143,8 +143,8 @@ export function Dashboards() {
                 <View className="flex-row p-2">
                   <View className="flex-2 items-start align-middle" >
                     <Text />
-                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: "#008000" }} /> Income</Text>
-                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: "#FF0000" }} /> Expenses</Text>
+                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: '#008000' }} /> Income</Text>
+                    <Text><View className="w-4 h-4 mr-1 rounded-full" style={{ backgroundColor: '#FF0000' }} /> Expenses</Text>
                     <Text className="font-bold pl-5">Sum</Text>
                   </View>
                   {lastDaysData.map((item, index) => (
@@ -163,19 +163,22 @@ export function Dashboards() {
 
             {/* Gráfico de Pizza */}
             <View className="bg-white rounded-xl p-1 m-4 divide-slate-200 divide-y">
-              <Text>Distribuição de Despesas</Text>
+              <Text className="text-center m-2 font-bold text-lg" >Distribuição de Despesas</Text>
               <View className="flex-row align-middle text-center items-center">
-                <VictoryPie
-                  width={200}
-                  height={200}
-                  padAngle={1}
-                  // innerRadius={50}
-                  data={pieChartData}
-                  colorScale={pieChartData.map((item) => item.color)}
-                  labels={({ datum, index }) => index < 3 ? `${datum.y}` : ''}
-                // labelRadius={75}
-                // style={{ labels: { fill: 'black' } }}
-                />
+                <View className="mr-1">
+
+                  <VictoryPie
+                    width={225}
+                    height={225}
+                    padAngle={1}
+                    // innerRadius={50}
+                    data={pieChartData}
+                    colorScale={pieChartData.map((item) => item.color)}
+                    labels={({ datum, index }) => index < 3 ? `${datum.y}` : ''}
+                  // labelRadius={75}
+                  // style={{ labels: { fill: 'black' } }}
+                  />
+                </View>
 
                 <View className="flex-col -ml-10">
                   {pieChartData.map((item, index) => (

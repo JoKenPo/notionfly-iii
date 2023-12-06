@@ -22,6 +22,7 @@ export function FirstAccess() {
         const savedDatabaseId = await AsyncStorage.getItem('databaseId');
 
         if (savedSecretKey !== null && savedDatabaseId !== null) {
+          setLoading(true);
           setSecretKey(savedSecretKey);
           setDatabaseId(savedDatabaseId);
 
@@ -40,12 +41,17 @@ export function FirstAccess() {
 
   useEffect(() => {
     if (!notionCore.loading) {
-      if (notionCore.transactions.length > 0)
-        navigation.navigate('Drawer', { screen: 'Dashboards' });
+      if (notionCore.transactions.length > 0) { navigation.navigate('Drawer', { screen: 'Dashboards' }); }
 
-      setLoading(false)
+      setLoading(false);
     } else {
-      setLoading(true)
+      console.log('secretKey: ', secretKey);
+      if (!secretKey || !databaseId) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
     }
 
     // eslint-disable-next-line
@@ -71,7 +77,7 @@ export function FirstAccess() {
     <View className="flex-1 justify-center items-center p-4">
       <Image source={require('../../../assets/images/logo.png')} className="w-24 h-12 mb-4" />
 
-      {!notionCore.loading ? (
+      {!loading ? (
         <>
           <Text className="text-lg text-center mb-4">
             Bem-vindo ao Notionfly III. Insira suas credenciais:

@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client';
-import { QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
+import { CreatePageParameters, QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { get, save } from './cache';
 
@@ -7,10 +7,10 @@ const NAMESPACE = 'notion-page';
 AsyncStorage.setItem(NAMESPACE, '');
 
 interface ITransactions {
-  id: string, 
-  name: string, 
-  amount: string, 
-  date: Date, 
+  id: string,
+  name: string,
+  amount: string,
+  date: Date,
   category: Array<string>
 }
 
@@ -102,69 +102,31 @@ export class Notion {
 
   // async insertPage(repo: Repo) {
     async insertPage(repo) {
-      if (repo.description && repo.description.length >= 2000) {
-          repo.description = repo.description.substr(0, 120) + '...';
-      }
+
       const data = await this.notion.pages.create({
-          parent: {
-              database_id: this.databaseId,
+        parent: {
+          type: 'database_id',
+          database_id: '103270b4887b4eecbe3ad5a5964d4564',
+        },
+        properties: {
+          Name: {
+            title: [
+              {
+                text: {
+                  content: repo.name,
+                },
+              },
+            ],
           },
-          properties: {
-              Name: {
-                  type: 'title',
-                  title: [
-                      {
-                          type: 'text',
-                          text: {
-                              content: repo.nameWithOwner,
-                          },
-                      },
-                  ],
-              },
-              Type: {
-                  type: 'select',
-                  select: {
-                      name: 'Star',
-                  },
-              },
-              Link: {
-                  type: 'url',
-                  url: repo.url,
-              },
-              Description: {
-                  type: 'rich_text',
-                  rich_text: [
-                      {
-                          type: 'text',
-                          text: {
-                              content: repo.description || '',
-                          },
-                      },
-                  ],
-              },
-              'Primary Language': {
-                  type: 'select',
-                  select: {
-                      name: repo?.primaryLanguage?.name || 'null',
-                  },
-              },
-              'Repository Topics': {
-                  type: 'multi_select',
-                  multi_select: repo.repositoryTopics || [],
-              },
-              'Starred At': {
-                  type: 'date',
-                  date: {
-                      start: repo.starredAt,
-                      end: repo.starredAt,
-                  },
-              },
+          Context: {
+            multi_select: [{name: '⛏ Task'}],
           },
-      });
+        },
+      } as CreatePageParameters);
 
-      this.pages[repo.nameWithOwner] = { id: data.id };
+      this.pages[repo.name] = { id: data.id };
 
-      console.log(`insert page ${repo.nameWithOwner} success, page id is ${data.id}`);
+      console.log(`insert page ${repo.name} success, page id is ${data.id}`);
 
       this.save();
   }
@@ -204,15 +166,15 @@ export class Notion {
     console.log('this.accounts: ',this.accounts);
 
     // this.save();
-    return this.accounts
+    return this.accounts;
   }
 
   addAccounts(pages) {
     pages.forEach((page) => {
         this.accounts[page.properties.Name.title[0].plain_text] = {
           id: page.id,
-          type: page.properties["Source Type"].select.name,
-          balance: page.properties["# Balance TOTAL"].formula.number
+          type: page.properties['Source Type'].select.name,
+          balance: page.properties['# Balance TOTAL'].formula.number,
         };
     });
 
@@ -254,22 +216,22 @@ export class Notion {
     // console.log('this.transactions: ',this.transactions);
 
     // this.save();
-    return this.transactions
+    return this.transactions;
   }
 
   async addTransactions(pages) {
-    let newTransaction : ITransactions[] = []
+    let newTransaction : ITransactions[] = [];
     await pages.forEach((page) => {
       newTransaction.push({
           id: page.id,
           name: page.properties.Name.title[0].plain_text,
           amount: page.properties.Amount.number,
           date: page.properties.Date.date.start,
-          category: page.properties.Category.multi_select
+          category: page.properties.Category.multi_select,
         });
     });
 
-    await this.transactions.push(...newTransaction)
+    await this.transactions.push(...newTransaction);
     // this.save();
   }
 
@@ -294,14 +256,14 @@ export class Notion {
       const page = await this.notion.blocks.children.list({
         block_id: db.id.split('-').join(''),
       });
-  
+
       for (const item of page.results) {
         if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Transactions') {
           this.transactionsDatabaseId = item.id;
           console.log('this.transactionsDatabaseId: ', this.transactionsDatabaseId);
           transactionsDatabase = await this.syncTransactions();
         }
-  
+
         if (item.type === 'child_database' && item.child_database && item.child_database.title === 'Accounts') {
           this.accountsDatabaseId = item.id;
           console.log('this.accountsDatabaseId: ', this.accountsDatabaseId);
@@ -309,8 +271,8 @@ export class Notion {
         }
       }
     }
-  
-  
+
+
     return {
       accounts: accountsDatabase,
       transactions: transactionsDatabase,

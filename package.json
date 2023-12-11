@@ -24,7 +24,7 @@
     "expo-screen-orientation": "~5.0.1",
     "lucide-react-native": "^0.294.0",
     "nativewind": "^2.0.11",
-    "postcss": "^8.4.30",
+    "postcss": "^8.4.32",
     "react": "^18.1.0",
     "react-native": "^0.70.8",
     "react-native-chart-kit": "^6.12.0",

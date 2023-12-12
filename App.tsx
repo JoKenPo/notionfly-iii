@@ -8,6 +8,7 @@ import 'react-native-gesture-handler';
 // import { getMainDatabase } from './src/libs/notion';
 import Routes from './src/routes';
 import { NotionProvider } from './src/contexts/NotionContext';
+import { Toast } from './src/components/Toast/Toast';
 
 function App() {
   console.log('app is starting');
@@ -23,7 +24,12 @@ function App() {
 
   return (
     <NotionProvider>
+      {/* Only use ToastProvider if it is using Context implementation.
+    Zustand implementation doesn't need a provider */}
+      {/* <ToastProvider> */}
       <Routes />
+      <Toast />
+      {/* </ToastProvider> */}
     </NotionProvider>
   );
 }

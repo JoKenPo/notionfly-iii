@@ -101,12 +101,12 @@ export class Notion {
   }
 
   // async insertPage(repo: Repo) {
-    async insertPage(repo) {
+    async insertPage(repo: any) {
 
       const data = await this.notion.pages.create({
         parent: {
           type: 'database_id',
-          database_id: '103270b4887b4eecbe3ad5a5964d4564',
+          database_id: this.transactionsDatabaseId,
         },
         properties: {
           Name: {
@@ -118,17 +118,26 @@ export class Notion {
               },
             ],
           },
-          Context: {
-            multi_select: [{name: '⛏ Task'}],
+          Amount: {
+            number: repo.amount,
+            type: 'number',
+          },
+          Type: {
+            select: { name: 'Deposit' },
+            type: 'select',
+          },
+          Date : {
+            date: { start: new Date().toISOString() },
           },
         },
       } as CreatePageParameters);
 
-      this.pages[repo.name] = { id: data.id };
+      // this.pages[repo.name] = { id: data.id };
 
       console.log(`insert page ${repo.name} success, page id is ${data.id}`);
 
-      this.save();
+      // this.save();
+      return data.id;
   }
 
 

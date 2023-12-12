@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Button } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import RNPickerSelect from 'react-native-picker-select';
 import { NotionContext } from '../../contexts/NotionContext';
@@ -31,7 +31,7 @@ export function Transaction() {
 
   const createTransaction = async () => {
     try {
-      await notionCore.notion.insertPage(name);
+      await notionCore?.notion?.insertPage({ name: name, amount: 10.00 });
       console.log('transaction created');
     } catch (e) {
       console.log(`error when trying to create the transaction : ${e}`);
@@ -104,6 +104,14 @@ export function Transaction() {
           value={destinationAccount}
           onChangeText={(text) => setDestinationAccount(text)}
           className="w-1/2 p-2 border rounded"
+        />
+      </View>
+      <View>
+
+        <Button
+          title="Add to notion"
+          style={{ alignSelf: 'center', marginTop: 40 }}
+          onPress={() => createTransaction()}
         />
       </View>
     </View>

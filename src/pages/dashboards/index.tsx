@@ -112,12 +112,9 @@ export function Dashboards() {
       >
         <View className="py-4">
 
-          <View className="flex items-center justify-center">
 
-            {/* {
-              notionCore.loading ? (<Text>carregando...</Text>)
-                : (<Text>ja carregou {JSON.stringify(notionCore.transactions)}</Text>)
-            } */}
+          {/* {notionCore.transactions ? ( */}
+          <View className="flex items-center justify-center">
 
             {/* Gráfico Últimos Dias */}
             <View className="bg-white rounded-xl p-0 my-2 divide-slate-200 divide-y">
@@ -219,8 +216,12 @@ export function Dashboards() {
               }}
               className="my-4"
             />
-          </View>
+          </View> 
+          {/* ) */}
+          
+          {/* : (<Text>Erro</Text>)} */}
         </View>
+        
       </ScrollView>
       <AddButton />
     </>

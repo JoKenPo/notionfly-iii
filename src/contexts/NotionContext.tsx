@@ -1,27 +1,23 @@
-import React, { useEffect } from 'react';
-import { createContext } from 'react';
-
-// import { notion, getMainDatabase } from '../libs/notion';
-
+import React, { useEffect, createContext, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Notion } from '../libs/notion';
 
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface IProps { children: React.ReactNode; }
+interface IProps {
+  children: React.ReactNode;
+}
 
 interface IAccount {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 interface INotion {
-  transactionsDatabaseId?: string
-  accountsDatabaseId?: string
-  accounts?: IAccount[]
-  transactions?: any
-  notion: any
-  loading: boolean,
+  transactionsDatabaseId?: string;
+  accountsDatabaseId?: string;
+  accounts: IAccount[];
+  transactions: any[];
+  notion: Notion | undefined;
+  loading: boolean;
 }
 
 export const NotionContext = createContext<INotion>({
@@ -34,71 +30,69 @@ export const NotionContext = createContext<INotion>({
 });
 
 const NotionProvider = ({ children }: IProps) => {
-
-  const [transactionsDatabaseId, setTransactionsDatabase] = React.useState<string>();
-  const [accountsDatabaseId, setAccountsDatabase] = React.useState<string>();
-  const [accounts, setAccounts] = React.useState<IAccount[]>([]);
-  const [transactions, setTransactions] = React.useState();
-  const [notion, setNotion] = React.useState<Notion>();
-  const [loading, setLoading] = React.useState<boolean>(true);
+  const [transactionsDatabaseId, setTransactionsDatabaseId] = useState<string | undefined>();
+  const [accountsDatabaseId, setAccountsDatabaseId] = useState<string | undefined>();
+  const [accounts, setAccounts] = useState<IAccount[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [notion, setNotion] = useState<Notion | undefined>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const loadSavedInfo = async () => {
+      try {
+        const savedSecretKey = await AsyncStorage.getItem('secretKey');
+        const savedDatabaseId = await AsyncStorage.getItem('databaseId');
+
+        if (savedSecretKey && savedDatabaseId) {
+          const newNotion = new Notion(savedSecretKey, savedDatabaseId);
+          await setNotion(newNotion);
+          setTransactionsDatabaseId(newNotion.transactionsDatabaseId);
+          setAccountsDatabaseId(newNotion.accountsDatabaseId);
+        }
+      } catch (error) {
+        console.log('Error loading saved info:', error);
+      }
+    };
+
     loadSavedInfo();
   }, []);
 
-  const loadSavedInfo = async () => {
-    try {
-
-      const savedSecretKey = await AsyncStorage.getItem('secretKey');
-      const savedDatabaseId = await AsyncStorage.getItem('databaseId');
-
-      if (savedSecretKey !== null && savedDatabaseId !== null) {
-        // const databasesIds = getMainDatabase();
-
-        // setTransactionsDatabase(databasesIds.transactionsDatabaseId);
-        // setAccountsDatabase(databasesIds.accountsDatabaseId);
-        await setNotion(await new Notion(savedSecretKey, savedDatabaseId));
-        // notion.fullSyncIfNeeded();
-      }
-
-    } catch (error) {
-      console.log('error: ', error);
-      // navigation.navigate('FirstAccess');
-    }
-  };
-
-  const getNotionDatabases = async () => {
-    if (notion) {
-
-      await notion.getMainDatabase()
-        .then(() => {
+  useEffect(() => {
+    const getNotionDatabases = async () => {
+      try {
+        if (notion) {
+          await notion.getMainDatabase();
           setAccounts(notion.accounts);
           setTransactions(notion.transactions);
-        })
-        .catch((error) => {
-          console.log('Error when tryng to get main databases from notion: ', error);
-        });
-    }
-  };
+        }
+      } catch (error) {
+        console.log('Error when trying to get main databases from Notion:', error);
+        AsyncStorage.removeItem('secretKey')
+        AsyncStorage.removeItem('databaseId')
+      }
+    };
 
-  useEffect(() => {
     getNotionDatabases();
   }, [notion]);
 
   useEffect(() => {
-    setTransactions(notion?.transactions);
-    if (notion?.transactions.length) { setLoading(false); }
+    if (notion?.transactions.length) {
+      setLoading(false);
+    }
   }, [notion?.transactions.length]);
-  // const navigation = useNavigation(); // Inicialize a navegação
+
+  const newTransaction = async (data: any) => {
+    if (notion) {
+      await notion.insertPage(data);
+    }
+  };
 
   return (
     <NotionContext.Provider value={{ accounts, transactions, accountsDatabaseId, transactionsDatabaseId, notion, loading }}>
       {children}
     </NotionContext.Provider>
   );
-
 };
-
 
 export { NotionProvider };
 export const useNotion = () => React.useContext(NotionContext);

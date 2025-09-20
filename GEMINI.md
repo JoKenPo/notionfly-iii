@@ -417,13 +417,23 @@ These commands make AI calls and may take up to a minute:
 _This guide ensures Claude Code has immediate access to Task Master's essential functionality for agentic development workflows._
 
 ---
+
 # Project-Specific Context: notionfly-iii
 
 This section contains project-specific documentation to provide context for the AI assistant.
 
+## Development Best Practices
+
+- **TDD (Test-Driven Development):** New features should be developed following the Red-Green-Refactor cycle.
+- **Validation:** After any change (new feature or fix), always run the project's tests and linter to ensure code quality and correctness.
+  - To run tests: `npm test`
+  - To run linter: `npx eslint .`
+
 ---
-Content from: 01-analise-projeto-original.md
+
 ---
+
+## Content from: 01-analise-projeto-original.md
 
 # Análise do Projeto Original
 
@@ -439,8 +449,8 @@ O funcionamento pode ser dividido em três partes principais: configuração, bu
 
 O projeto utiliza um arquivo `.env` para armazenar informações sensíveis:
 
--   `NOTION_API_KEY`: Chave de integração secreta do Notion para autorizar o acesso.
--   `NOTION_DATABASE_ID`: Identificador único da tabela no Notion a ser consultada.
+- `NOTION_API_KEY`: Chave de integração secreta do Notion para autorizar o acesso.
+- `NOTION_DATABASE_ID`: Identificador único da tabela no Notion a ser consultada.
 
 O arquivo `app.config.js` carrega essas variáveis e as disponibiliza para o aplicativo através do campo `extra` do Expo.
 
@@ -448,21 +458,21 @@ O arquivo `app.config.js` carrega essas variáveis e as disponibiliza para o apl
 
 Este arquivo é o núcleo da integração.
 
--   **Cliente API:** Utiliza a biblioteca `@notionhq/client` para criar um cliente de API, autenticado com a `NOTION_API_KEY`.
--   **Função `getDatabase`:** Realiza uma consulta (`databases.query`) na base de dados especificada. Após receber os dados brutos, ela os mapeia para um formato mais simples e fácil de usar no aplicativo, extraindo o `id` e as propriedades relevantes de cada item.
+- **Cliente API:** Utiliza a biblioteca `@notionhq/client` para criar um cliente de API, autenticado com a `NOTION_API_KEY`.
+- **Função `getDatabase`:** Realiza uma consulta (`databases.query`) na base de dados especificada. Após receber os dados brutos, ela os mapeia para um formato mais simples e fácil de usar no aplicativo, extraindo o `id` e as propriedades relevantes de cada item.
 
 ### 2.3. Interface do Usuário (`App.js`)
 
 Este é o componente principal que renderiza a tela.
 
--   **Gerenciamento de Estado:** Usa os hooks `useState` e `useEffect` do React.
-    -   `useState` é usado para armazenar a lista de dados (`data`) e controlar o estado de carregamento (`loading`).
--   **Busca de Dados:** O `useEffect` é disparado quando o componente é montado para chamar a função `getDatabase()`.
-    -   Quando os dados são recebidos, o estado `data` é atualizado e o `loading` é desativado.
-    -   Possui tratamento básico para erros e um bloco `finally` para garantir que o indicador de carregamento seja sempre removido.
--   **Renderização:**
-    -   Se `loading` for `true`, exibe um `ActivityIndicator`.
-    -   Caso contrário, usa o componente `FlatList` para renderizar a lista de itens, exibindo o nome e o valor de cada entrada do Notion.
+- **Gerenciamento de Estado:** Usa os hooks `useState` e `useEffect` do React.
+  - `useState` é usado para armazenar a lista de dados (`data`) e controlar o estado de carregamento (`loading`).
+- **Busca de Dados:** O `useEffect` é disparado quando o componente é montado para chamar a função `getDatabase()`.
+  - Quando os dados são recebidos, o estado `data` é atualizado e o `loading` é desativado.
+  - Possui tratamento básico para erros e um bloco `finally` para garantir que o indicador de carregamento seja sempre removido.
+- **Renderização:**
+  - Se `loading` for `true`, exibe um `ActivityIndicator`.
+  - Caso contrário, usa o componente `FlatList` para renderizar a lista de itens, exibindo o nome e o valor de cada entrada do Notion.
 
 ## 3. Fluxo Resumido
 
@@ -473,3 +483,41 @@ Este é o componente principal que renderiza a tela.
 5.  **Processamento:** O serviço recebe a resposta e a transforma em um array de objetos simplificado.
 6.  **Atualização do Estado:** Os dados retornam para `App.js`, que atualiza seu estado.
 7.  **Renderização Final:** O React re-renderiza o componente, que agora exibe a `FlatList` com os dados do Notion.
+
+---
+
+## Content from: 02-plano-improvment.md
+
+# Plano de Melhorias - NotionFly III
+
+## 1. Visão Geral
+
+O objetivo é refatorar a interface do usuário (UI) do aplicativo, saindo de uma lista simples para um design moderno e mais funcional, inspirado no estilo **Material 3**. A nova interface será implementada utilizando a biblioteca `react-native-paper` para garantir consistência visual e agilidade no desenvolvimento.
+
+## 2. Estratégia de Implementação
+
+### 2.1. Biblioteca de UI
+
+- **Adoção do `react-native-paper`:** Todos os novos componentes de UI serão construídos com base nesta biblioteca. Isso inclui `Card`, `Text`, `Button`, `FAB` (Floating Action Button), e `Appbar`.
+- **Tema Customizado:** Será configurado um tema (`theme`) para a aplicação, definindo a paleta de cores (primária, secundária, superfícies) e a tipografia, para alinhar com a identidade visual desejada e facilitar futuras alterações de design.
+
+### 2.2. Redesenho da Tela Principal (`HomeScreen`)
+
+A `HomeScreen` será transformada em um painel de controle (dashboard).
+
+- **Estrutura:**
+  - **Cabeçalho (`Appbar`):** Um cabeçalho no topo da tela com o título da aplicação.
+  - **Card de Resumo:** Um `Card` em destaque exibindo uma métrica principal (ex: "Total de Itens no Notion").
+  - **Lista de Itens em Cards:** A lista de dados vinda do Notion será renderizada como uma `FlatList`, onde cada item é um componente `Card` individual. Isso melhora a separação visual e permite adicionar mais informações ou ações a cada item no futuro.
+  - **Botão de Ação Flutuante (`FAB`):** Um `FAB` será posicionado no canto inferior direito para uma ação principal (a ser definida, inicialmente pode ser um "Adicionar" ou "Atualizar").
+
+### 2.3. Estrutura de Componentes
+
+- Componentes reutilizáveis (como o Card de item da lista) serão criados em `src/components/` para manter o código organizado e escalável.
+
+## 3. Próximos Passos
+
+1.  **Configurar o `Provider`:** Envolver a aplicação com o `PaperProvider` da `react-native-paper` e definir o tema base.
+2.  **Refatorar `HomeScreen.tsx`:** Aplicar a nova estrutura de dashboard.
+3.  **Criar Componente `NotionItemCard.tsx`:** Desenvolver o card customizado para os itens da lista.
+4.  **Testar e Iterar:** Validar o novo design e fazer ajustes conforme necessário.

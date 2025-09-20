@@ -11,27 +11,25 @@ const config: ExpoConfig = {
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
   },
-  assetBundlePatterns: [
-    '**/*'
-  ],
+  assetBundlePatterns: ['**/*'],
   ios: {
-    supportsTablet: true
+    supportsTablet: true,
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff'
-    }
+      backgroundColor: '#ffffff',
+    },
   },
   web: {
-    favicon: './assets/favicon.png'
+    favicon: './assets/favicon.png',
   },
   extra: {
     NOTION_API_KEY: process.env.NOTION_API_KEY,
-    NOTION_DATABASE_ID: process.env.NOTION_DATABASE_ID
-  }
+    NOTION_DATABASE_ID: process.env.NOTION_DATABASE_ID,
+  },
 };
 
 export default config;

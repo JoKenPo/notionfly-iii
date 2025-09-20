@@ -12,8 +12,8 @@ O funcionamento pode ser dividido em três partes principais: configuração, bu
 
 O projeto utiliza um arquivo `.env` para armazenar informações sensíveis:
 
--   `NOTION_API_KEY`: Chave de integração secreta do Notion para autorizar o acesso.
--   `NOTION_DATABASE_ID`: Identificador único da tabela no Notion a ser consultada.
+- `NOTION_API_KEY`: Chave de integração secreta do Notion para autorizar o acesso.
+- `NOTION_DATABASE_ID`: Identificador único da tabela no Notion a ser consultada.
 
 O arquivo `app.config.js` carrega essas variáveis e as disponibiliza para o aplicativo através do campo `extra` do Expo.
 
@@ -21,21 +21,21 @@ O arquivo `app.config.js` carrega essas variáveis e as disponibiliza para o apl
 
 Este arquivo é o núcleo da integração.
 
--   **Cliente API:** Utiliza a biblioteca `@notionhq/client` para criar um cliente de API, autenticado com a `NOTION_API_KEY`.
--   **Função `getDatabase`:** Realiza uma consulta (`databases.query`) na base de dados especificada. Após receber os dados brutos, ela os mapeia para um formato mais simples e fácil de usar no aplicativo, extraindo o `id` e as propriedades relevantes de cada item.
+- **Cliente API:** Utiliza a biblioteca `@notionhq/client` para criar um cliente de API, autenticado com a `NOTION_API_KEY`.
+- **Função `getDatabase`:** Realiza uma consulta (`databases.query`) na base de dados especificada. Após receber os dados brutos, ela os mapeia para um formato mais simples e fácil de usar no aplicativo, extraindo o `id` e as propriedades relevantes de cada item.
 
 ### 2.3. Interface do Usuário (`App.js`)
 
 Este é o componente principal que renderiza a tela.
 
--   **Gerenciamento de Estado:** Usa os hooks `useState` e `useEffect` do React.
-    -   `useState` é usado para armazenar a lista de dados (`data`) e controlar o estado de carregamento (`loading`).
--   **Busca de Dados:** O `useEffect` é disparado quando o componente é montado para chamar a função `getDatabase()`.
-    -   Quando os dados são recebidos, o estado `data` é atualizado e o `loading` é desativado.
-    -   Possui tratamento básico para erros e um bloco `finally` para garantir que o indicador de carregamento seja sempre removido.
--   **Renderização:**
-    -   Se `loading` for `true`, exibe um `ActivityIndicator`.
-    -   Caso contrário, usa o componente `FlatList` para renderizar a lista de itens, exibindo o nome e o valor de cada entrada do Notion.
+- **Gerenciamento de Estado:** Usa os hooks `useState` e `useEffect` do React.
+  - `useState` é usado para armazenar a lista de dados (`data`) e controlar o estado de carregamento (`loading`).
+- **Busca de Dados:** O `useEffect` é disparado quando o componente é montado para chamar a função `getDatabase()`.
+  - Quando os dados são recebidos, o estado `data` é atualizado e o `loading` é desativado.
+  - Possui tratamento básico para erros e um bloco `finally` para garantir que o indicador de carregamento seja sempre removido.
+- **Renderização:**
+  - Se `loading` for `true`, exibe um `ActivityIndicator`.
+  - Caso contrário, usa o componente `FlatList` para renderizar a lista de itens, exibindo o nome e o valor de cada entrada do Notion.
 
 ## 3. Fluxo Resumido
 

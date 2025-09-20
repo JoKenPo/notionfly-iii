@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { getDatabase } from '../services/notion';
 import { processNotionData } from '../services/notionProcessor';
 import { getCredentials } from '../services/credentials';
+import { NotionItem } from '../types';
 
 export const useNotionData = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<NotionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +21,7 @@ export const useNotionData = () => {
           const processedData = processNotionData(rawData);
           setData(processedData);
         }
-      } catch (e) {
+      } catch {
         setError('Failed to fetch data from Notion. Check your credentials.');
       }
     }

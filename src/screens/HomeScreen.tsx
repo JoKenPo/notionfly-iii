@@ -1,21 +1,27 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Appbar, ActivityIndicator, FAB, Text, Card } from 'react-native-paper';
-import { useNotionData } from '../hooks/useNotionData';
+import { useNotion } from '../contexts/NotionContext';
 import NotionItemCard from '../components/NotionItemCard';
-import { NotionItem } from '../types';
+import { ITransaction } from '../types';
 
 export default function HomeScreen() {
-  const { data, loading, error } = useNotionData();
+  const { accounts, transactions, loading, error, refetch } = useNotion();
 
-  const renderItem = ({ item }: { item: NotionItem }) => (
-    <NotionItemCard item={item} />
+  const renderItem = ({ item }: { item: ITransaction }) => (
+    <NotionItemCard
+      item={{
+        id: item.id,
+        title: item.name,
+        value: item.amount.toString(), // NotionItemCard expects a string value
+      }}
+    />
   );
 
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text>Error loading data.</Text>
+        <Text>Error: {error}</Text>
       </View>
     );
   }
@@ -24,6 +30,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.Content title="NotionFly III" />
+        <Appbar.Action icon="refresh" onPress={refetch} />
       </Appbar.Header>
 
       {loading ? (
@@ -35,11 +42,13 @@ export default function HomeScreen() {
           <Card style={styles.summaryCard}>
             <Card.Title title="Visão Geral" />
             <Card.Content>
-              <Text variant="titleLarge">{data.length} Itens Carregados</Text>
+              <Text variant="bodyMedium">
+                {Object.keys(accounts).length} Contas e {transactions.length} Transações Carregadas
+              </Text>
             </Card.Content>
           </Card>
           <FlatList
-            data={data}
+            data={transactions}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}

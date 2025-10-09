@@ -24,3 +24,11 @@ export interface IAccount {
   type: string;
   balance: number;
 }
+
+export interface ITransaction {
+  id: string;
+  name: string;
+  amount: number;
+  date: string;
+  category: string[];
+}

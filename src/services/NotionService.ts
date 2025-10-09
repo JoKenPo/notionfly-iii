@@ -1,9 +1,8 @@
 import { Client } from '@notionhq/client';
 import {
   ListBlockChildrenResponse,
-  QueryDatabaseResponse,
 } from '@notionhq/client/build/src/api-endpoints';
-import { IAccount } from '../types';
+import { IAccount, ITransaction } from '../types';
 
 export class NotionService {
   private notion: Client;
@@ -11,26 +10,31 @@ export class NotionService {
   public accountsDatabaseId: string | undefined;
   public transactionsDatabaseId: string | undefined;
   public accounts: Record<string, IAccount> = {};
+  public transactions: ITransaction[] = [];
 
   constructor(apiKey: string, databaseId: string) {
     this.notion = new Client({
       auth: apiKey,
+      fetch: fetch,
     });
     this.databaseId = databaseId;
   }
 
   async getMainDatabase() {
-    const databases = await this.notion.databases.query({
-      database_id: this.databaseId,
-      filter: {
-        property: 'Component',
-        select: {
-          equals: 'Core Databases',
+    const databases = (await this.notion.request({
+      path: `databases/${this.databaseId}/query`,
+      method: 'post',
+      body: {
+        filter: {
+          property: 'Component',
+          select: {
+            equals: 'Core Databases',
+          },
         },
+        sorts: [],
       },
-      sorts: [],
-    });
-
+    })) as { results: any[] };
+    console.log('databases', databases);
     for (const db of databases.results) {
       const page: ListBlockChildrenResponse = await this.notion.blocks.children.list({
         block_id: db.id.split('-').join(''),
@@ -48,7 +52,6 @@ export class NotionService {
       }
     }
 
-    // Logic to process results will be added in the next TDD cycle
     return {
       accounts: [],
       transactions: [],
@@ -60,11 +63,14 @@ export class NotionService {
       return;
     }
 
-    const database: QueryDatabaseResponse = await this.notion.databases.query({
-      database_id: this.accountsDatabaseId,
-      page_size: 100,
-      start_cursor: undefined,
-    });
+    const database = (await this.notion.request({
+      path: `databases/${this.accountsDatabaseId}/query`,
+      method: 'post',
+      body: {
+        page_size: 100,
+        start_cursor: undefined,
+      },
+    })) as { results: any[] };
 
     this.addAccounts(database.results);
   }
@@ -77,5 +83,34 @@ export class NotionService {
         balance: page.properties['# Balance TOTAL'].formula.number,
       };
     });
+  }
+
+  async syncTransactions() {
+    if (!this.transactionsDatabaseId) {
+      return;
+    }
+
+    const database = (await this.notion.request({
+      path: `databases/${this.transactionsDatabaseId}/query`,
+      method: 'post',
+      body: {
+        page_size: 100,
+        start_cursor: undefined,
+      },
+    })) as { results: any[] };
+
+    this.addTransactions(database.results);
+  }
+
+  private addTransactions(pages: any[]) {
+    const newTransactions: ITransaction[] = pages.map((page) => ({
+      id: page.id,
+      name: page.properties.Name.title[0].plain_text,
+      amount: page.properties.Amount.number,
+      date: page.properties.Date.date.start,
+      category: page.properties.Category.multi_select.map((c: any) => c.name),
+    }));
+
+    this.transactions.push(...newTransactions);
   }
 }

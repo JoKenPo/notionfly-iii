@@ -425,7 +425,7 @@ This section contains project-specific documentation to provide context for the 
 ## Development Best Practices
 
 - **TDD (Test-Driven Development):** New features should be developed following the Red-Green-Refactor cycle.
-- **Validation:** After any change (new feature or fix), always run the project's tests and linter to ensure code quality and correctness.
+- **Validation:** After a feature or fix is implemented, and after the user's approval, run the project's tests and linter to ensure code quality and correctness.
   - To run tests: `npm test`
   - To run linter: `npx eslint .`
 

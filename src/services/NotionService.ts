@@ -3,62 +3,180 @@ import {
   ListBlockChildrenResponse,
 } from '@notionhq/client/build/src/api-endpoints';
 import { IAccount, ITransaction } from '../types';
+import { mockAccountsResponse, mockTransactionsResponse } from './mockData';
 
 export class NotionService {
   private notion: Client;
-  private databaseId: string;
+  private pageId: string;
+  private apiKey: string;
+
   public accountsDatabaseId: string | undefined;
   public transactionsDatabaseId: string | undefined;
   public accounts: Record<string, IAccount> = {};
   public transactions: ITransaction[] = [];
+  private useMockData: boolean;
 
-  constructor(apiKey: string, databaseId: string) {
+  constructor(apiKey: string, pageId: string, useMockData = false) {
     this.notion = new Client({
       auth: apiKey,
-      fetch: fetch,
+      fetch: window.fetch.bind(window),
     });
-    this.databaseId = databaseId;
+    this.pageId = pageId;
+    this.apiKey = apiKey;
+
+    this.useMockData = useMockData;
   }
 
-  async getMainDatabase() {
-    const databases = (await this.notion.request({
-      path: `databases/${this.databaseId}/query`,
-      method: 'post',
-      body: {
-        filter: {
-          property: 'Component',
-          select: {
-            equals: 'Core Databases',
-          },
-        },
-        sorts: [],
-      },
-    })) as { results: any[] };
-    console.log('databases', databases);
-    for (const db of databases.results) {
-      const page: ListBlockChildrenResponse = await this.notion.blocks.children.list({
-        block_id: db.id.split('-').join(''),
+    async getMainDatabase() {
+
+      // Step 1: Find the 'System' database ID from the main page's children
+
+      const page = await this.notion.blocks.children.list({
+
+        block_id: this.pageId,
+
       });
 
-      for (const item of page.results) {
-        if ('type' in item && item.type === 'child_database' && item.child_database) {
-          if (item.child_database.title === 'Accounts') {
-            this.accountsDatabaseId = item.id;
+  
+
+      const systemDbId = page.results
+
+        .map(item => {
+
+          if ('type' in item && item.type === 'child_database' && item.child_database.title === 'System') {
+
+            return item.id;
+
           }
-          if (item.child_database.title === 'Transactions') {
-            this.transactionsDatabaseId = item.id;
-          }
-        }
-      }
-    }
+
+          return null;
+
+        })
+
+        .find(id => id !== null);
+
+  
+
+              if (!systemDbId) {
+
+  
+
+                throw new Error("Could not find the 'System' database on the main page.");
+
+  
+
+              }
+
+  
+
+          
+
+  
+
+              // Step 2: Query the 'System' database to find the pages for 'Accounts' and 'Transactions'
+
+  
+
+                                          const systemDbContent = (await fetch(
+
+  
+
+                                            `https://api.notion.com/v1/databases/${systemDbId}/query`,
+
+  
+
+                                            {
+
+  
+
+                                              method: 'POST',
+
+  
+
+                                              headers: {
+
+  
+
+                                                Authorization: `Bearer ${this.apiKey}`,
+
+  
+
+                                                'Content-Type': 'application/json',
+
+  
+
+                                                'Notion-Version': '2022-06-28',
+
+  
+
+                                              },
+
+  
+
+                                              body: JSON.stringify({ page_size: 100 }),
+
+  
+
+                                            }
+
+  
+
+                                          ).then((res) => res.json())) as { results: any[] };
+
+        
+
+            // Step 3: For each page ('Accounts', 'Transactions'), find the real database ID within it
+
+            for (const page of systemDbContent.results) {
+
+              const title = (page as any).properties?.Name?.title?.[0]?.plain_text;
+
+              const pageId = page.id;
+
+        
+
+              if (title === 'Accounts' || title === 'Transactions') {
+
+                const children = await this.notion.blocks.children.list({
+
+                  block_id: pageId,
+
+                });
+
+        
+
+                const childDb = children.results.find(child => 'type' in child && child.type === 'child_database');
+
+        
+
+                if (childDb && 'id' in childDb) {
+
+                  if (title === 'Accounts') {
+
+                    this.accountsDatabaseId = childDb.id;
+
+                  } else if (title === 'Transactions') {
+
+                    this.transactionsDatabaseId = childDb.id;
+
+                  }
+
+                }
+
+              }
+
+            }
 
     return {
       accounts: [],
       transactions: [],
     };
-  }
+  } async syncAccounts() {
+    if (this.useMockData) {
+      this.addAccounts(mockAccountsResponse.results);
+      return;
+    }
 
-  async syncAccounts() {
     if (!this.accountsDatabaseId) {
       return;
     }
@@ -86,6 +204,10 @@ export class NotionService {
   }
 
   async syncTransactions() {
+    if (this.useMockData) {
+      this.addTransactions(mockTransactionsResponse.results);
+      return;
+    }
     if (!this.transactionsDatabaseId) {
       return;
     }

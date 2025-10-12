@@ -9,14 +9,14 @@ type ConfigScreenProps = {
 
 export default function ConfigScreen({ onConfigured }: ConfigScreenProps) {
   const [apiKey, setApiKey] = useState('');
-  const [databaseId, setDatabaseId] = useState('');
+  const [pageId, setPageId] = useState('');
 
   const handleSave = async () => {
-    if (apiKey && databaseId) {
-      await saveCredentials(apiKey, databaseId);
+    if (apiKey && pageId) {
+      await saveCredentials(apiKey, pageId);
       onConfigured();
     } else {
-      Alert.alert('Error', 'Please enter both API Key and Database ID.');
+      Alert.alert('Error', 'Please enter both API Key and Page ID.');
     }
   };
 
@@ -34,9 +34,9 @@ export default function ConfigScreen({ onConfigured }: ConfigScreenProps) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Notion Database ID"
-        value={databaseId}
-        onChangeText={setDatabaseId}
+        placeholder="Notion Page ID"
+        value={pageId}
+        onChangeText={setPageId}
       />
       <Button title="Save" onPress={handleSave} />
     </View>

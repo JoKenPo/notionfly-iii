@@ -8,15 +8,41 @@ import { ITransaction } from '../types';
 export default function HomeScreen() {
   const { accounts, transactions, loading, error, refetch } = useNotion();
 
+  // --- Dashboard Logic ---
+
+  // 1. Calculate total expenses for the current month
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const monthlyExpenses = transactions
+    .filter(t => {
+      const tDate = new Date(t.date);
+      return (
+        t.amount < 0 &&
+        tDate.getMonth() === currentMonth &&
+        tDate.getFullYear() === currentYear
+      );
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // 2. Get the 5 most recent transactions
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
+  // --- Render Logic ---
+
   const renderItem = ({ item }: { item: ITransaction }) => (
-    <NotionItemCard
-      item={{
-        id: item.id,
-        title: item.name,
-        value: item.amount.toString(), // NotionItemCard expects a string value
-      }}
-    />
+    <NotionItemCard item={item} />
   );
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(amount);
+  };
 
   if (error) {
     return (
@@ -29,7 +55,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <Appbar.Header>
-        <Appbar.Content title="NotionFly III" />
+        <Appbar.Content title="Dashboard" />
         <Appbar.Action icon="refresh" onPress={refetch} />
       </Appbar.Header>
 
@@ -40,16 +66,21 @@ export default function HomeScreen() {
       ) : (
         <>
           <Card style={styles.summaryCard}>
-            <Card.Title title="Visão Geral" />
+            <Card.Title title="Despesas do Mês" />
             <Card.Content>
-              <Text variant="bodyMedium">
-                {Object.keys(accounts).length} Contas e {transactions.length} Transações Carregadas
+              <Text variant="displayMedium" style={{ color: 'red' }}>
+                {formatCurrency(monthlyExpenses)}
               </Text>
             </Card.Content>
           </Card>
+
+          <Text variant="titleLarge" style={styles.listTitle}>
+            Últimas Transações
+          </Text>
+
           <FlatList
-            data={transactions}
-            keyExtractor={(item) => item.id}
+            data={recentTransactions}
+            keyExtractor={item => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
           />
@@ -76,6 +107,11 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     margin: 16,
+  },
+  listTitle: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
   },
   listContent: {
     paddingBottom: 80, // To avoid FAB overlap

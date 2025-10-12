@@ -30,66 +30,43 @@ beforeEach(() => {
 
 describe('NotionService', () => {
   it('should be able to create an instance', () => {
-    const notionService = new NotionService('test_api_key', 'test_database_id');
+    const notionService = new NotionService('test_api_key', 'test_page_id');
     expect(notionService).toBeInstanceOf(NotionService);
     expect(MockClient).toHaveBeenCalledWith({ auth: 'test_api_key', fetch: fetch });
   });
 
   describe('getMainDatabase', () => {
-    it('should call the low-level request method with correct parameters', async () => {
-      const notionService = new NotionService(
-        'test_api_key',
-        'test_database_id',
-      );
-      await notionService.getMainDatabase();
-
-      expect(mockRequest).toHaveBeenCalledWith({
-        path: 'databases/test_database_id/query',
-        method: 'post',
-        body: {
-          filter: {
-            property: 'Component',
-            select: {
-              equals: 'Core Databases',
-            },
-          },
-          sorts: [],
-        },
-      });
-    });
-
-    it('should fetch children for each database found', async () => {
-      const fakeDbPage = { id: 'fake-page-id' };
-      mockRequest.mockResolvedValueOnce({ results: [fakeDbPage] });
-
-      const notionService = new NotionService(
-        'test_api_key',
-        'test_database_id',
-      );
+    it('should call blocks.children.list with the correct page ID', async () => {
+      const notionService = new NotionService('test_api_key', 'test_page_id');
       await notionService.getMainDatabase();
 
       expect(mockChildrenList).toHaveBeenCalledWith({
-        block_id: 'fakepageid',
+        block_id: 'test_page_id',
       });
     });
 
-    it('should identify and store the accounts database ID', async () => {
-      const fakeDbPage = { id: 'fake-page-id' };
+    it('should identify and store the accounts and transactions database IDs', async () => {
       const fakeAccountsDb = {
         id: 'fake-accounts-db-id',
         type: 'child_database',
         child_database: { title: 'Accounts' },
       };
-      mockRequest.mockResolvedValueOnce({ results: [fakeDbPage] });
-      mockChildrenList.mockResolvedValueOnce({ results: [fakeAccountsDb] });
+      const fakeTransactionsDb = {
+        id: 'fake-transactions-db-id',
+        type: 'child_database',
+        child_database: { title: 'Transactions' },
+      };
+      mockChildrenList.mockResolvedValueOnce({
+        results: [fakeAccountsDb, fakeTransactionsDb],
+      });
 
-      const notionService = new NotionService(
-        'test_api_key',
-        'test_database_id',
-      );
+      const notionService = new NotionService('test_api_key', 'test_page_id');
       await notionService.getMainDatabase();
 
       expect(notionService.accountsDatabaseId).toBe('fake-accounts-db-id');
+      expect(notionService.transactionsDatabaseId).toBe(
+        'fake-transactions-db-id',
+      );
     });
   });
 
@@ -97,7 +74,7 @@ describe('NotionService', () => {
     it('should call the low-level request method with correct parameters', async () => {
       const notionService = new NotionService(
         'test_api_key',
-        'test_database_id',
+        'test_page_id',
       );
       notionService.accountsDatabaseId = 'fake-accounts-db-id';
 
@@ -126,7 +103,7 @@ describe('NotionService', () => {
 
       const notionService = new NotionService(
         'test_api_key',
-        'test_database_id',
+        'test_page_id',
       );
       notionService.accountsDatabaseId = 'fake-accounts-db-id';
 
@@ -144,7 +121,7 @@ describe('NotionService', () => {
     it('should call the low-level request method with correct parameters', async () => {
       const notionService = new NotionService(
         'test_api_key',
-        'test_database_id',
+        'test_page_id',
       );
       notionService.transactionsDatabaseId = 'fake-transactions-db-id';
 
@@ -174,7 +151,7 @@ describe('NotionService', () => {
 
       const notionService = new NotionService(
         'test_api_key',
-        'test_database_id',
+        'test_page_id',
       );
       notionService.transactionsDatabaseId = 'fake-transactions-db-id';
 

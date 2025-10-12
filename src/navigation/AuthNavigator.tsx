@@ -10,8 +10,8 @@ export default function AuthNavigator() {
 
   const checkCredentials = async () => {
     setLoading(true);
-    const { apiKey, databaseId } = await getCredentials();
-    setHasCredentials(!!(apiKey && databaseId));
+    const { apiKey, pageId } = await getCredentials();
+    setHasCredentials(!!(apiKey && pageId));
     setLoading(false);
   };
 

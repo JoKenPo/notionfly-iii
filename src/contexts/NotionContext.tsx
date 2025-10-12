@@ -24,11 +24,12 @@ export const NotionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setError(null);
 
     try {
-      const { apiKey, databaseId } = await getCredentials();
-      if (!apiKey || !databaseId) {
+      const { apiKey, pageId } = await getCredentials();
+      console.log('Credentials from AsyncStorage:', { apiKey, pageId });
+      if (!apiKey || !pageId) {
         throw new Error('Credentials not found');
       }
-      const notionService = new NotionService(apiKey, databaseId);
+      const notionService = new NotionService(apiKey, pageId, false);
       console.log('NotionService', notionService);
       await notionService.getMainDatabase();
       await notionService.syncAccounts();
